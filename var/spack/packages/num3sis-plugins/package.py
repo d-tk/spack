@@ -1,4 +1,5 @@
 from spack import *
+import re
 
 class Num3sisPlugins(Package):
     """num3sis plugins. """
@@ -23,6 +24,7 @@ class Num3sisPlugins(Package):
             cmake_args = [
                 "..",
                 "-Ddtk_DIR:PATH=%s" % spec['dtk'].prefix.lib+"/cmake/dtk",
+                "-Dnum_DIR:PATH=%s" % spec['dtk'].prefix.lib+"/cmake/num3sis",
                 "-DVTK_DIR:PATH=%s" % spec['vtk'].prefix.lib+"/cmake/vtk"+vtk_maj_version
             ]
             cmake_args.extend(std_cmake_args)
