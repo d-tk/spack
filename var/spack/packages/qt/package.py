@@ -8,6 +8,9 @@ class Qt(Package):
     list_url   = 'http://download.qt-project.org/official_releases/qt/'
     list_depth = 2
 
+    version('5.5.1', '59f0216819152b77536cf660b015d784',
+            url='http://download.qt-project.org/official_releases/qt/5.5/5.5.1/single/qt-everywhere-opensource-src-5.5.1.tar.gz')
+
     version('5.4.0', 'e8654e4b37dd98039ba20da7a53877e6',
             url='http://download.qt-project.org/official_releases/qt/5.4/5.4.0/single/qt-everywhere-opensource-src-5.4.0.tar.gz')
     version('5.3.2', 'febb001129927a70174467ecb508a682',
@@ -30,6 +33,7 @@ class Qt(Package):
     depends_on("libpng")
     depends_on("libmng")
     depends_on("jpeg")
+    patch("qt5-xcb.patch",when='@5.5.1',level=1)
 
     # Webkit
     # depends_on("gperf")
