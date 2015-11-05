@@ -39,29 +39,29 @@ class Dtk(Package):
                 cmake_args.append("-DQT_QMAKE_EXECUTABLE:PATH=qmake-qt5")
 
             if spec.satisfies('+wrappers'):
-                cmake_args.append("-DDTK_BUILD_WRAPPERS")
+                cmake_args.append("-DDTK_BUILD_WRAPPERS=ON")
 
             if spec.satisfies('+composer'):
-                "-DDTK_BUILD_COMPOSER"
+                "-DDTK_BUILD_COMPOSER=ON"
 
             # support layers
             if spec.satisfies('+distributedsupport'):
-                "-DDTK_BUILD_SUPPORT_DISTRIBUTED"
+                "-DDTK_BUILD_SUPPORT_DISTRIBUTED=ON"
 
             if spec.satisfies('+coresupport'):
-                "-DDTK_BUILD_SUPPORT_CORE -DDTK_BUILD_SUPPORT_MATH"
+                "-DDTK_BUILD_SUPPORT_CORE=ON -DDTK_BUILD_SUPPORT_MATH=ON"
 
             if spec.satisfies('+composersupport'):
-                "-DDTK_BUILD_SUPPORT_COMPOSER"
+                "-DDTK_BUILD_SUPPORT_COMPOSER=ON"
 
             if spec.satisfies('+guisupport'):
-                "-DDTK_BUILD_SUPPORT_GUI"
+                "-DDTK_BUILD_SUPPORT_GUI=ON"
 
             if spec.satisfies('+plotsupport'):
-                "-DDTK_BUILD_SUPPORT_PLOT"
+                "-DDTK_BUILD_SUPPORT_PLOT=ON"
 
             if spec.satisfies('+vrsupport'):
-                "-DDTK_BUILD_SUPPORT_PVR"
+                "-DDTK_BUILD_SUPPORT_PVR=ON"
 
 
             cmake(*cmake_args)
