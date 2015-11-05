@@ -42,26 +42,26 @@ class Dtk(Package):
                 cmake_args.append("-DDTK_BUILD_WRAPPERS=ON")
 
             if spec.satisfies('+composer'):
-                "-DDTK_BUILD_COMPOSER=ON"
+                cmake_args.append("-DDTK_BUILD_COMPOSER=ON")
 
             # support layers
             if spec.satisfies('+distributedsupport'):
-                "-DDTK_BUILD_SUPPORT_DISTRIBUTED=ON"
+                cmake_args.append("-DDTK_BUILD_SUPPORT_DISTRIBUTED=ON")
 
             if spec.satisfies('+coresupport'):
-                "-DDTK_BUILD_SUPPORT_CORE=ON -DDTK_BUILD_SUPPORT_MATH=ON"
+                cmake_args.append("-DDTK_BUILD_SUPPORT_CORE=ON -DDTK_BUILD_SUPPORT_MATH=ON")
 
             if spec.satisfies('+composersupport'):
-                "-DDTK_BUILD_SUPPORT_COMPOSER=ON"
+                cmake_args.append("-DDTK_BUILD_SUPPORT_COMPOSER=ON")
 
             if spec.satisfies('+guisupport'):
-                "-DDTK_BUILD_SUPPORT_GUI=ON"
+                cmake_args.append("-DDTK_BUILD_SUPPORT_GUI=ON")
 
             if spec.satisfies('+plotsupport'):
-                "-DDTK_BUILD_SUPPORT_PLOT=ON"
+                cmake_args.append("-DDTK_BUILD_SUPPORT_PLOT=ON")
 
             if spec.satisfies('+vrsupport'):
-                "-DDTK_BUILD_SUPPORT_PVR=ON"
+                cmake_args.append("-DDTK_BUILD_SUPPORT_PVR=ON")
 
 
             cmake(*cmake_args)
