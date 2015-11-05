@@ -1,4 +1,5 @@
 from spack import *
+import re
 
 class Num3sis(Package):
     """num3sis is a modular platform devoted to scientific computing and numerical simulation. It is not restricted to a particular application field, but is designed to host complex multidisciplinary simulations.. """
@@ -16,7 +17,11 @@ class Num3sis(Package):
     variant('electro', default=False, description='Enable Electro layer')
     variant('design', default=False, description='Enable design layer')
     variant('store', default=False, description='Enable store layer')
-#    variant('examples', default=False, description='Enable examples')
+
+    variant('qt', default=True, description='add explicit qt dep')
+
+    #    variant('examples', default=False, description='Enable examples')
+
 
     depends_on("dtk+coresupport+composersupport+plotsupport+guisupport+distributedsupport")
     depends_on("dtk-linear-algebra-sparse")
@@ -24,10 +29,13 @@ class Num3sis(Package):
 
     def install(self, spec, prefix):
         with working_dir('spack-build', create=True):
+
+            vtk_maj_version  = re.sub('@(\d+\.\d+)\.\d+', '\g<1>',spec['vtk'].format("$@"))
+
             cmake_args = [
                 "..",
                 "-Ddtk_DIR:PATH=%s" % spec['dtk'].prefix.lib+"/cmake/dtk",
-                "-DVTK_DIR:PATH=%s" % spec['vtk'].prefix.lib+"/cmake/vtk"
+                "-DVTK_DIR:PATH=%s" % spec['vtk'].prefix.lib+"/cmake/vtk"+vtk_maj_version
             ]
             cmake_args.extend(std_cmake_args)
 
