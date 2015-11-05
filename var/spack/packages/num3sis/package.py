@@ -7,7 +7,7 @@ class Num3sis(Package):
 
     gitroot = "git@dtk.inria.fr:num3sis/num3sis.git"
     version('master', git=gitroot, branch = 'master')
-    version('traces', git=gitroot, branch = 'numtraces')
+    version('traces', git=gitroot, branch = 'numTraces')
     version('distributed', git=gitroot, branch = 'simulator_new_distributed')
 
     variant('test', default=False, description='Enable test building')
@@ -45,15 +45,24 @@ class Num3sis(Package):
                 cmake_args.append("-DQT_QMAKE_EXECUTABLE:PATH=qmake-qt5")
 
             if spec.satisfies('+aero'):
-                cmake_args.append("-DBUILD_AERO")
+                cmake_args.append("-DBUILD_AERO=ON")
+            else:
+                cmake_args.append("-DBUILD_AERO=OFF")
+                
             if spec.satisfies('+design'):
-                cmake_args.append("-DBUILD_DESIGN")
+                cmake_args.append("-DBUILD_DESIGN=ON")
+
             if spec.satisfies('+traffic'):
-                cmake_args.append("-DBUILD_TRAFFIC")
+                cmake_args.append("-DBUILD_TRAFFIC=ON")
+
             if spec.satisfies('+electro'):
-                cmake_args.append("-DBUILD_ELECTRO")
+                cmake_args.append("-DBUILD_ELECTRO=ON")
+
             if spec.satisfies('+store'):
-                cmake_args.append("-DBUILD_STORE")
+                cmake_args.append("-DBUILD_STORE=ON")
+                
+            if spec.satisfies('@traces'):
+                cmake_args.append("-DBUILD_TRACES=ON")
 
             cmake(*cmake_args)
             make()
