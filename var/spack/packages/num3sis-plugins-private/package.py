@@ -11,6 +11,7 @@ class Num3sisPluginsPrivate(Package):
     variant('test', default=False, description='Enable test building')
 
     depends_on("num3sis")
+    depends_on("vtk")
     depends_on("dtk-linear-algebra-sparse")
 
     def install(self, spec, prefix):
