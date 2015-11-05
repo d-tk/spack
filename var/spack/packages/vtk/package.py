@@ -13,6 +13,7 @@ class Vtk(Package):
 
     variant('opengl2', default=False, description='Enable OpenGL2 backend')
     variant('tbb', default=False, description='Enable SMP implementation using TBB')
+    variant('openmp', default=False, description='Enable SMP implementation using OpenMP')
 
     depends_on("qt")
 
@@ -41,6 +42,8 @@ class Vtk(Package):
 
             if spec.satisfies('+tbb'):
                 cmake_args.append("-DVTK_SMP_IMPLEMENTATION_TYPE:STRING=TBB")
+            if spec.satisfies('+openmp'):
+                cmake_args.append("-DVTK_SMP_IMPLEMENTATION_TYPE:STRING=OpenMP")
 
             if spec['qt'].satisfies('@5'):
                 cmake_args.append("-DVTK_QT_VERSION:STRING=5")
