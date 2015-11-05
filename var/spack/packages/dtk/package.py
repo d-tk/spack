@@ -49,7 +49,9 @@ class Dtk(Package):
                 cmake_args.append("-DDTK_BUILD_SUPPORT_DISTRIBUTED=ON")
 
             if spec.satisfies('+coresupport'):
-                cmake_args.append("-DDTK_BUILD_SUPPORT_CORE=ON -DDTK_BUILD_SUPPORT_MATH=ON")
+                cmake_args.append("-DDTK_BUILD_SUPPORT_CORE=ON")
+                cmake_args.append("-DDTK_BUILD_SUPPORT_MATH=ON")
+                cmake_args.append("-DDTK_BUILD_SUPPORT_CONTAINER=ON")
 
             if spec.satisfies('+composersupport'):
                 cmake_args.append("-DDTK_BUILD_SUPPORT_COMPOSER=ON")
