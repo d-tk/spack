@@ -2,7 +2,7 @@ from spack import *
 import re
 
 class Num3sisPluginsPrivate(Package):
-    """num3sis plugins. """
+    """num3sis private plugins. """
     homepage = "http://num3sis.inria.fr/"
 
     gitroot = "git@dtk.inria.fr:num3sis/num3sis-plugins-private.git"
@@ -11,8 +11,6 @@ class Num3sisPluginsPrivate(Package):
     variant('test', default=False, description='Enable test building')
 
     depends_on("num3sis")
-    depends_on("vtk")
-    depends_on("dtk-linear-algebra-sparse")
 
     def install(self, spec, prefix):
 
