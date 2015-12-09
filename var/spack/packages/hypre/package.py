@@ -1,4 +1,5 @@
 from spack import *
+import os
 
 class Hypre(Package):
     """Hypre is a library of high performance preconditioners that
@@ -21,6 +22,10 @@ class Hypre(Package):
         # Hypre's source is staged under ./src so we'll have to manually
         # cd into it.
         with working_dir("src"):
+
+            os.environ['CFLAGS']   = "-g -O2 -fPIC"
+            os.environ['CXXFLAGS'] = "-g -O2 -fPIC"
+                                             
             configure(
                 "--prefix=%s" % prefix,
                 "--with-blas-libs=blas",
