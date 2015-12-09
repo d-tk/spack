@@ -12,8 +12,8 @@ class Maphys(Package):
             url='http://maphys.gforge.inria.fr/maphys_0.9.2.tar.gz')
 
     svnroot  = "https://scm.gforge.inria.fr/anonscm/svn/maphys/"
-    version('svn-maphys_0.9.1',
-            svn=svnroot+"branches/maphys_0.9.1")
+    version('maphys-dev',
+            svn=svnroot+"branches/maphys-dev")
 
     variant('mumps', default=False, description='Enable MUMPS direct solver')
     variant('pastix', default=True, description='Enable PASTIX direct solver')
@@ -37,9 +37,9 @@ class Maphys(Package):
         mf.filter('prefix := /usr/local', 'prefix := %s' % spec.prefix)
 
         mpi = spec['mpi'].prefix
-        mf.filter('MPIFC := mpif90', 'MPIFC := mpif90 -I%s -ffree-form -ffree-line-length-0' % mpi.include)
-        mf.filter('MPICC := mpicc', 'MPICC := mpicc -I%s' % mpi.include)
-        mf.filter('MPIF77 := mpif77', 'MPIF77 := mpif77 -I%s' % mpi.include)
+        mf.filter('MPIFC := mpif90', 'MPIFC := mpif90 -I%s -fPIC -ffree-form -ffree-line-length-0' % mpi.include)
+        mf.filter('MPICC := mpicc', 'MPICC := mpicc -fPIC -I%s' % mpi.include)
+        mf.filter('MPIF77 := mpif77', 'MPIF77 := mpif77 -fPIC -I%s' % mpi.include)
 
         if '^mkl-blas' in spec:
             mf.filter('# THREAD_FCFLAGS \+= -DMULTITHREAD_VERSION -openmp',
@@ -126,6 +126,11 @@ class Maphys(Package):
         if spec.satisfies('+examples'):
             make('check-examples')
         make("install")
+        install("include/smph_maphys_type_c.h", '%s/include' % prefix)
+        install("include/dmph_maphys_type_c.h", '%s/include' % prefix)
+        install("include/cmph_maphys_type_c.h", '%s/include' % prefix)
+        install("include/zmph_maphys_type_c.h", '%s/include' % prefix)
+
         if spec.satisfies('+examples'):
             # examples are not installed by default
             install_tree('examples', '%s/lib/maphys/examples' % prefix)
