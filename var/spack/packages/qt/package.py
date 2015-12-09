@@ -24,15 +24,15 @@ class Qt(Package):
     # Use system openssl for security.
     #depends_on("openssl")
 
-    depends_on("glib")
-    depends_on("gtkplus")
-    depends_on("libxml2")
+#    depends_on("glib")
+#    depends_on("gtkplus")
+#    depends_on("libxml2")
     depends_on("zlib")
-    depends_on("dbus")
-    depends_on("libtiff")
-    depends_on("libpng")
-    depends_on("libmng")
-    depends_on("jpeg")
+#    depends_on("dbus")
+#    depends_on("libtiff")
+#    depends_on("libpng")
+#    depends_on("libmng")
+#    depends_on("jpeg")
     patch("qt5-xcb.patch",when='@5.5.1',level=1)
 
     # Webkit
@@ -43,8 +43,8 @@ class Qt(Package):
     # depends_on("icu4c")
 
     # OpenGL hardware acceleration
-    depends_on("mesa")
-    depends_on("libxcb")
+#    depends_on("mesa")
+#    depends_on("libxcb")
 
 
     def setup_dependent_environment(self, module, spec, dep_spec):
