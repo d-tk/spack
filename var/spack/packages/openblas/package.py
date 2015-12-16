@@ -63,4 +63,3 @@ class Openblas(Package):
         make_args.append("PREFIX="+prefix+ " install")
 
         make(*make_args,parallel=False)
-        make(*make_args,parallel=False)
