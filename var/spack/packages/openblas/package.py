@@ -2,42 +2,73 @@ from spack import *
 import os
 import platform
 
+
 class Openblas(Package):
-    """An optimized BLAS library based on GotoBLAS2 1.13 BSD version."""
+    """OpenBLAS is an optimized BLAS library based on GotoBLAS2 1.13 BSD version."""
     homepage = "http://www.openblas.net/"
     url      = "http://github.com/xianyi/OpenBLAS/archive/v0.2.15.tar.gz"
 
     version('0.2.15', 'b1190f3d3471685f17cfd1ec1d252ac9')
     version('develop', git='https://github.com/xianyi/OpenBLAS.git', branch='develop')
+    version('0.2.14', '53cda7f420e1ba0ea55de536b24c9701')
 
-    provides('blas')
+    version('master', git="https://github.com/xianyi/OpenBLAS.git", branch = 'develop')
 
     variant('mt', default=False, description="Use Multithreaded version")
     variant('openmp', default=False, description="Use Multithreaded version with OpenMP compatibility")
+    variant('shared', default=False, description='Enable shared library')
+
+    provides('blas')
+    provides('cblas')
+    provides('lapack')
 
     def setup_dependent_environment(self, module, spec, dep_spec):
-        """Dependencies of this package will get the library name for netlib-blas."""
-        if platform.system() == 'Darwin':
-            module.blaslibname=[os.path.join(self.spec.prefix.lib, "libopenblas.dylib")]
+        """Dependencies of this package will get the library name for openblas."""
+        if spec.satisfies('+shared'):
+            if platform.system() == 'Darwin':
+                module.blaslibname=[os.path.join(self.spec.prefix.lib, "libopenblas.dylib")]
+                module.cblaslibname=[os.path.join(self.spec.prefix.lib, "libopenblas.dylib")]
+                module.lapacklibname=[os.path.join(self.spec.prefix.lib, "libopenblas.dylib")]
+            else:
+                module.blaslibname=[os.path.join(self.spec.prefix.lib, "libopenblas.so")]
+                module.cblaslibname=[os.path.join(self.spec.prefix.lib, "libopenblas.so")]
+                module.lapacklibname=[os.path.join(self.spec.prefix.lib, "libopenblas.so")]
         else:
-            module.blaslibname=[os.path.join(self.spec.prefix.lib, "libopenblas.so")]
+            module.blaslibname=[os.path.join(self.spec.prefix.lib, "libopenblas.a")]
+            module.cblaslibname=[os.path.join(self.spec.prefix.lib, "libopenblas.a")]
+            module.lapacklibname=[os.path.join(self.spec.prefix.lib, "libopenblas.a")]
+
+        module.blaslibfortname = module.blaslibname
+        module.cblaslibfortname = module.cblaslibname
+        module.lapacklibfortname = module.lapcklibname
         if spec.satisfies('+mt'):
             module.blaslibname+=["-lpthread"]
-        module.blaslibfortname = module.blaslibname
 
     def install(self, spec, prefix):
+          options='BINARY=64 DYNAMIC_ARCH=1'
 
-        # configure
-        options='NO_LAPACK=1 NO_CBLAS=1'
-
-        if not spec.satisfies('+mt'):
+        if spec.satisfies('+mt'):
+            options+=' USE_THREAD=1'
+        else:
             options+=' USE_THREAD=0'
 
         if spec.satisfies('+openmp'):
             options+=' USE_OPENMP=1'
 
-        # build
-        make('%s'%options, parallel=False)
+        if spec.satisfies('+shared'):
+            options+=' NO_STATIC=1'
+        else:
+            options+=' NO_SHARED=1'
 
-        # install
-        make('install', 'PREFIX=%s' % prefix)
+        if spec.satisfies('%gcc'):
+            options+=' FC=gfortran'
+
+        if spec.satisfies('%mkl'):
+            options+=' FC=ifort'
+
+        make('%s'%options)
+
+        # make install needs the other parameters as well
+        options+=' PREFIX='+prefix+ ' install'
+
+        make('%s'%options, parallel=False)
