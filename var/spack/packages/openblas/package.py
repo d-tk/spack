@@ -2,7 +2,6 @@ from spack import *
 import os
 import platform
 
-
 class Openblas(Package):
     """OpenBLAS is an optimized BLAS library based on GotoBLAS2 1.13 BSD version."""
     homepage = "http://www.openblas.net/"
