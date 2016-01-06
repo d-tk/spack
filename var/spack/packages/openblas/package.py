@@ -40,7 +40,7 @@ class Openblas(Package):
              module.blaslibname+=["-lpthread"]
         module.blaslibfortname = module.blaslibname
         module.cblaslibfortname = module.cblaslibname
-        module.lapacklibfortname = module.lapcklibname
+        module.lapacklibfortname = module.lapacklibname
 
 
     def install(self, spec, prefix):
