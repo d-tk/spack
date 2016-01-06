@@ -37,7 +37,7 @@ class Petsc(Package):
         config_args = ["-prefix=%s" % prefix]
 
         if spec.satisfies('^openblas'):
-            if spec[blas].satisfies('+shared'):
+            if spec['blas'].satisfies('+shared'):
                 config_args.append("--with-blas-lapack-lib=%s/libopenblas.so" % spec['blas'].prefix.lib)
             else:
                 config_args.append("--with-blas-lapack-lib=%s/libopenblas.a" % spec['blas'].prefix.lib)
