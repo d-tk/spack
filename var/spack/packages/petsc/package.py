@@ -14,18 +14,19 @@ class Petsc(Package):
     version('3.5.2', 'ad170802b3b058b5deb9cd1f968e7e13', url="http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.5.2.tar.gz")
     version('3.5.1', 'a557e029711ebf425544e117ffa44d8f', url="http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.5.1.tar.gz")
 
-    variant('openblas', default=True,  description='Enable OpenBlas support for blas and lapack')
+    #variant('openblas', default=True,  description='Enable OpenBlas support for blas and lapack')
     variant('mkl',      default=False, description='Enable MKL support for blas and lapack')
     variant('hypre',    default=False, description='Enable Hypre preconditionners')
     variant('metis',    default=False, description='Enable Metis support')
     variant('parmetis', default=False, description='Enable ParMetis support')
     variant('hdf5',     default=False, description='Enable Hdf5 support')
 
-    depends_on("openblas",   when='~mkl+openblas')
-    depends_on("mkl-blas",   when='+mkl')
-    depends_on("mkl-lapack", when='+mkl')
-    depends_on("blas",       when='~openblas~mkl')
-    depends_on("lapack",     when='~openblas~mkl')
+    #depends_on("openblas",   when='~mkl')
+    #depends_on("openblas",   when='')
+    #depends_on("mkl-blas",   when='+mkl')
+    #depends_on("mkl-lapack", when='+mkl')
+    depends_on("blas")
+    depends_on("lapack")
     depends_on("mpi")
     depends_on("hypre",      when='+hypre')
     depends_on("metis",      when='+metis')
@@ -35,18 +36,21 @@ class Petsc(Package):
     def install(self, spec, prefix):
         config_args = ["-prefix=%s" % prefix]
 
-        if spec.satisfies('~openblas') and spec.satisfies('~mkl'):
-            config_args.append("--with-blas-lib=%s/libblas.a" % spec['blas'].prefix.lib)
-            config_args.append("--with-lapack-lib=%s/liblapack.a" % spec['lapack'].prefix.lib)
+        if spec.satisfies('^openblas'):
+            if spec[blas].satisfies('+shared'):
+                config_args.append("--with-blas-lapack-lib=%s/libopenblas.so" % spec['blas'].prefix.lib)
+            else:
+                config_args.append("--with-blas-lapack-lib=%s/libopenblas.a" % spec['blas'].prefix.lib)
 
-        if spec.satisfies('^openblas+shared'):
-            config_args.append("--with-blas-lapack-lib=%s/libopenblas.so" % spec['blas'].prefix.lib)
+        # elif spec.satisfies('^mkl-blas'):
+        #     config_args.append("--with-blas-lapack-dir=%s" % spec['blas'].prefix)
 
-        elif spec.satisfies('+mkl'):
-            config_args.append("--with-blas-lapack-dir=%s" % spec['blas'].prefix)
+        # elif spec.satisfies('^mkl-lapack'):
+        #     config_args.append("--with-blas-lapack-dir=%s" % spec['lapack'].prefix)
 
         else:
-            config_args.append("--with-blas-lapack-lib=%s/libopenblas.a" % spec['blas'].prefix.lib)
+            config_args.append("--with-blas-lib=%s/libblas.a" % spec['blas'].prefix.lib)
+            config_args.append("--with-lapack-lib=%s/liblapack.a" % spec['lapack'].prefix.lib)
 
         config_args.append("--with-mpi-dir=%s" % spec['mpi'].prefix)
 
