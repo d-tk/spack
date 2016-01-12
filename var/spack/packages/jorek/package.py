@@ -36,7 +36,9 @@ class Jorek(Package):
             cmake_args = [".."]
             cmake_args.extend(std_cmake_args)
 
-            cmake_args.extend(['-DSPM_DIR=%s' % spec['spm'].prefix])
+            cmake_args.extend(['-Dspm_DIR=%s' % spec['spm'].prefix])
+            
+
             cmake_args.extend(['-DCMAKE_INSTALL_PREFIX:PATH=%s' % prefix])
 
             cmake(*cmake_args)
