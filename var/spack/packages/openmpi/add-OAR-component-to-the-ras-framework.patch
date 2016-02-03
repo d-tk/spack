@@ -1,0 +1,504 @@
+From 3ba0f22a6c234665c40bafd5fb1fba52d6dadd69 Mon Sep 17 00:00:00 2001
+From: Nicolas Niclausse <Nicolas.Niclausse@inria.fr>
+Date: Wed, 26 Aug 2015 15:01:30 +0200
+Subject: [PATCH] add OAR component to the ras framework
+
+---
+ config/orte_check_oar.m4             |  52 ++++++++++++
+ orte/mca/ras/oar/Makefile.am         |  53 ++++++++++++
+ orte/mca/ras/oar/configure.m4        |  32 ++++++++
+ orte/mca/ras/oar/help-ras-oar.txt    |  25 ++++++
+ orte/mca/ras/oar/ras_oar.h           |  33 ++++++++
+ orte/mca/ras/oar/ras_oar_component.c |  87 ++++++++++++++++++++
+ orte/mca/ras/oar/ras_oar_module.c    | 155 +++++++++++++++++++++++++++++++++++
+ 7 files changed, 437 insertions(+)
+ create mode 100644 config/orte_check_oar.m4
+ create mode 100644 orte/mca/ras/oar/Makefile.am
+ create mode 100644 orte/mca/ras/oar/configure.m4
+ create mode 100644 orte/mca/ras/oar/help-ras-oar.txt
+ create mode 100644 orte/mca/ras/oar/ras_oar.h
+ create mode 100644 orte/mca/ras/oar/ras_oar_component.c
+ create mode 100644 orte/mca/ras/oar/ras_oar_module.c
+
+diff --git a/config/orte_check_oar.m4 b/config/orte_check_oar.m4
+new file mode 100644
+index 0000000..bb66533
+--- /dev/null
++++ b/config/orte_check_oar.m4
+@@ -0,0 +1,52 @@
++# -*- shell-script -*-
++#
++# Copyright (c) 2004-2005 The Trustees of Indiana University and Indiana
++#                         University Research and Technology
++#                         Corporation.  All rights reserved.
++# Copyright (c) 2004-2005 The University of Tennessee and The University
++#                         of Tennessee Research Foundation.  All rights
++#                         reserved.
++# Copyright (c) 2004-2005 High Performance Computing Center Stuttgart, 
++#                         University of Stuttgart.  All rights reserved.
++# Copyright (c) 2004-2005 The Regents of the University of California.
++#                         All rights reserved.
++# Copyright (c) 2006-2009 Cisco Systems, Inc.  All rights reserved.
++# Copyright (c) 2011      IBM Corporation.  All rights reserved.
++# $COPYRIGHT$
++# 
++# Additional copyrights may follow
++# 
++# $HEADER$
++#
++
++# 1. if --with-oar is given, always build
++# 2. if --without-oar is given, never build
++# 3. if neither is given, build if-and-only-if the OS is Linux or AIX
++
++# ORTE_CHECK_OAR(prefix, [action-if-found], [action-if-not-found])
++# --------------------------------------------------------
++AC_DEFUN([ORTE_CHECK_OAR],[
++    AC_ARG_WITH([oar],
++                [AC_HELP_STRING([--with-oar],
++                                [Build OAR scheduler component (default: yes)])])
++
++    if test "$with_oar" = "no" ; then
++        orte_check_oar_happy="no"
++    elif test "$with_oar" = "" ; then
++        # unless user asked, only build OAR component on Linux
++        case $host in
++            *-linux*)
++                orte_check_oar_happy="yes"
++                ;;
++            *)
++                orte_check_oar_happy="no"
++                ;;
++        esac
++    else
++        orte_check_oar_happy="yes"
++    fi
++
++    AS_IF([test "$orte_check_oar_happy" = "yes"], 
++          [$2], 
++          [$3])
++])
+diff --git a/orte/mca/ras/oar/Makefile.am b/orte/mca/ras/oar/Makefile.am
+new file mode 100644
+index 0000000..85ce7d7
+--- /dev/null
++++ b/orte/mca/ras/oar/Makefile.am
+@@ -0,0 +1,53 @@
++#
++# Copyright (c) 2008      The University of Tennessee and The University
++#                         of Tennessee Research Foundation.  All rights
++#                         reserved.
++# Copyright (c) 2008      Institut National de Recherche en Informatique
++#                         et Automatique. All rights reserved.
++# $COPYRIGHT$
++# 
++# Additional copyrights may follow
++# 
++# $HEADER$
++#
++
++
++# Use the top-level Makefile.options
++
++dist_ompidata_DATA = help-ras-oar.txt
++
++
++AM_CPPFLAGS = $(ras_oar_CPPFLAGS)
++
++sources = \
++        ras_oar.h \
++        ras_oar_component.c \
++        ras_oar_module.c
++
++
++# Make the output library in this directory, and name it either
++# mca_<type>_<name>.la (for DSO builds) or libmca_<type>_<name>.la
++# (for static builds).
++
++if MCA_BUILD_orte_ras_oar_DSO
++lib =
++lib_sources = 
++component = mca_ras_oar.la
++component_sources = $(sources)
++else
++lib = libmca_ras_oar.la
++lib_sources = $(sources)
++component =
++component_sources =
++endif
++
++mcacomponentdir = $(ompilibdir)
++mcacomponent_LTLIBRARIES = $(component)
++mca_ras_oar_la_SOURCES = $(component_sources)
++mca_ras_oar_la_LDFLAGS = -module -avoid-version $(ras_oar_LDFLAGS)
++mca_ras_oar_la_LIBADD = $(ras_oar_LIBS)
++
++noinst_LTLIBRARIES = $(lib)
++libmca_ras_oar_la_SOURCES = $(lib_sources)
++libmca_ras_oar_la_LDFLAGS = -module -avoid-version $(ras_oar_LDFLAGS)
++libmca_ras_oar_la_LIBADD = $(ras_oar_LIBS)
+diff --git a/orte/mca/ras/oar/configure.m4 b/orte/mca/ras/oar/configure.m4
+new file mode 100644
+index 0000000..88d46c6
+--- /dev/null
++++ b/orte/mca/ras/oar/configure.m4
+@@ -0,0 +1,32 @@
++# -*- shell-script -*-
++#
++# Copyright (c) 2008      The University of Tennessee and The University
++#                         of Tennessee Research Foundation.  All rights
++#                         reserved.
++# Copyright (c) 2008      Institut National de Recherche en Informatique
++#                         et Automatique. All rights reserved.
++#
++# Additional copyrights may follow
++# 
++# $HEADER$
++#
++
++
++# MCA_ras_oar_CONFIG([action-if-found], [action-if-not-found])
++# -----------------------------------------------------------
++AC_DEFUN([MCA_orte_ras_oar_CONFIG],[
++    AC_CONFIG_FILES([orte/mca/ras/oar/Makefile])
++
++    ORTE_CHECK_OAR([ras_oar], [ras_oar_good=1], [ras_oar_good=0])
++
++    # if check worked, set wrapper flags if so.  
++    # Evaluate succeed / fail
++    AS_IF([test "$ras_oar_good" = "1"],
++          [$1],
++          [$2])
++
++    # set build flags to use in makefile
++    AC_SUBST([ras_oar_CPPFLAGS])
++    AC_SUBST([ras_oar_LDFLAGS])
++    AC_SUBST([ras_oar_LIBS])
++])dnl
+diff --git a/orte/mca/ras/oar/help-ras-oar.txt b/orte/mca/ras/oar/help-ras-oar.txt
+new file mode 100644
+index 0000000..8859951
+--- /dev/null
++++ b/orte/mca/ras/oar/help-ras-oar.txt
+@@ -0,0 +1,25 @@
++# -*- text -*-
++#
++# Copyright (c) 2008      The University of Tennessee and The University
++#                         of Tennessee Research Foundation.  All rights
++#                         reserved.
++# Copyright (c) 2008      Institut National de Recherche en Informatique
++#                         et Automatique. All rights reserved.
++# $COPYRIGHT$
++# 
++# Additional copyrights may follow
++# 
++# $HEADER$
++#
++# This is the US/English help file for Open MPI MCA error messages.
++#
++[nodelist-failed]
++While trying to determine what resources are available, OAR failed when
++queried for a list of available nodes. This may indicate a problem with
++OAR or your cluster.
++
++[no-nodes-avail]
++While trying to determine what resources are available, OAR returned
++a list of available nodes from which we were unable to extract anything
++usable. This may indicate a problem with OAR or your cluster.
++
+diff --git a/orte/mca/ras/oar/ras_oar.h b/orte/mca/ras/oar/ras_oar.h
+new file mode 100644
+index 0000000..fadf100
+--- /dev/null
++++ b/orte/mca/ras/oar/ras_oar.h
+@@ -0,0 +1,33 @@
++/*
++ * Copyright (c) 2008      The University of Tennessee and The University
++ *                         of Tennessee Research Foundation.  All rights
++ *                         reserved.
++ * Copyright (c) 2008      Institut National de Recherche en Informatique
++ *                         et Automatique. All rights reserved.
++ * $COPYRIGHT$
++ * 
++ * Additional copyrights may follow
++ * 
++ * $HEADER$
++ */
++/**
++ * @file
++ *
++ * Resource Allocation (OAR)
++ */
++#ifndef ORTE_RAS_OAR_H
++#define ORTE_RAS_OAR_H
++
++#include "orte/mca/ras/ras.h"
++
++BEGIN_C_DECLS
++
++/**
++ * RAS Component 
++ */
++ORTE_DECLSPEC extern orte_ras_base_component_t mca_ras_oar_component;
++ORTE_DECLSPEC extern orte_ras_base_module_t orte_ras_oar_module;
++
++END_C_DECLS
++
++#endif
+diff --git a/orte/mca/ras/oar/ras_oar_component.c b/orte/mca/ras/oar/ras_oar_component.c
+new file mode 100644
+index 0000000..4c309b3
+--- /dev/null
++++ b/orte/mca/ras/oar/ras_oar_component.c
+@@ -0,0 +1,87 @@
++/*
++ * Copyright (c) 2008      The University of Tennessee and The University
++ *                         of Tennessee Research Foundation.  All rights
++ *                         reserved.
++ * Copyright (c) 2008      Institut National de Recherche en Informatique
++ *                         et Automatique. All rights reserved.
++ * $COPYRIGHT$
++ * 
++ * Additional copyrights may follow
++ * 
++ * $HEADER$
++ */
++
++#include "orte_config.h"
++#include "orte/constants.h"
++
++#include "opal/mca/base/base.h"
++#include "opal/mca/base/mca_base_param.h"
++#include "orte/util/proc_info.h"
++#include "orte/util/show_help.h"
++
++#include "ras_oar.h"
++
++/*
++ * Local functions
++ */
++
++static int orte_ras_oar_open(void);
++static int orte_ras_oar_close(void);
++static int orte_ras_oar_component_query(mca_base_module_t **module, int *priority);
++
++
++orte_ras_base_component_t mca_ras_oar_component = {
++    {
++        /* Indicate that we are a ras v2.0.0 component (which also
++         implies a specific MCA version) */
++        
++        ORTE_RAS_BASE_VERSION_2_0_0,
++        
++        "oar", /* MCA component name */
++        ORTE_MAJOR_VERSION,  /* MCA component major version */
++        ORTE_MINOR_VERSION,  /* MCA component minor version */
++        ORTE_RELEASE_VERSION,  /* MCA component release version */
++        orte_ras_oar_open,  /* component open  */
++        orte_ras_oar_close, /* component close */
++        orte_ras_oar_component_query
++      },
++      {
++          /* The component is checkpoint ready */
++          MCA_BASE_METADATA_PARAM_CHECKPOINT
++      }
++};
++
++
++/**
++  * component open/close/init function
++  */
++static int orte_ras_oar_open(void)
++{
++    return ORTE_SUCCESS;
++}
++
++
++static int orte_ras_oar_component_query(mca_base_module_t **module, int *priority)
++{
++    /* check if oar is running here */
++    if ( NULL == getenv("OAR_JOBID") ) {
++        /* nope, not here */
++        *module = NULL;
++        return ORTE_ERROR;
++    }
++    
++    *priority = 85;
++    *module = (mca_base_module_t *) &orte_ras_oar_module;
++    return ORTE_SUCCESS;
++}
++
++/**
++ *  Close all subsystems.
++ */
++
++static int orte_ras_oar_close(void)
++{
++    return ORTE_SUCCESS;
++}
++
++
+diff --git a/orte/mca/ras/oar/ras_oar_module.c b/orte/mca/ras/oar/ras_oar_module.c
+new file mode 100644
+index 0000000..70a3629
+--- /dev/null
++++ b/orte/mca/ras/oar/ras_oar_module.c
+@@ -0,0 +1,155 @@
++/*
++ * Copyright (c) 2008      The University of Tennessee and The University
++ *                         of Tennessee Research Foundation.  All rights
++ *                         reserved.
++ * Copyright (c) 2008      Institut National de Recherche en Informatique
++ *                         et Automatique. All rights reserved.
++ * $COPYRIGHT$
++ *
++ * Additional copyrights may follow
++ *
++ * $HEADER$
++ */
++#include "orte_config.h"
++#include "orte/constants.h"
++#include "orte/types.h"
++
++#include <errno.h>
++#include <unistd.h>
++#include <string.h>
++
++#include "orte/util/show_help.h"
++#include "opal/util/os_path.h"
++
++#include "orte/mca/errmgr/errmgr.h"
++#include "orte/runtime/orte_globals.h"
++#include "orte/util/name_fns.h"
++
++#include "opal/util/argv.h"
++
++#include "orte/mca/ras/base/ras_private.h"
++#include "ras_oar.h"
++
++
++/*
++ * Local functions
++ */
++static int orte_ras_oar_allocate(orte_job_t *jdata, opal_list_t *nodes);
++static int orte_ras_oar_finalize(void);
++static char *ras_oar_getline(FILE *fp);
++
++/*
++ * Global variable
++ */
++orte_ras_base_module_t orte_ras_oar_module = {
++    NULL,
++    orte_ras_oar_allocate,
++    NULL,
++    orte_ras_oar_finalize
++};
++
++
++static int orte_ras_oar_allocate(orte_job_t *jdata, opal_list_t *nodes)
++{
++    orte_node_t *node;
++    int i, num_nodes;
++    FILE* nodefile;
++    char* filename;
++    int32_t nodeid=0;
++    char *hostname;
++    opal_list_item_t* item;
++
++    /* get the list of allocated nodes */
++    if( NULL == ( filename = getenv( "OAR_NODEFILE" ) ) ) {
++        orte_show_help("help-ras-oar.txt", "nodelist-failed", true);
++        return ORTE_ERR_NOT_AVAILABLE;
++    }
++
++    nodefile = fopen(filename, "r");
++    if ( NULL == nodefile ) {
++        ORTE_ERROR_LOG( ORTE_ERR_FILE_OPEN_FAILURE );
++        free( filename );
++        return ORTE_ERR_FILE_OPEN_FAILURE;
++    }
++
++    node = NULL;
++    nodeid=0;
++
++    while ( NULL != (hostname = ras_oar_getline( nodefile )) ) {
++
++        /* the nodename is inserted by OAR as many times as we
++         * have slots on the machine.
++         */
++
++        for ( item = opal_list_get_first( nodes );
++              opal_list_get_end( nodes ) != item;
++              item = opal_list_get_next( item ) ) {
++            node = (orte_node_t*) item;
++            if (0 == strcmp( node->name, hostname )) {
++                ++node->slots;
++
++                OPAL_OUTPUT_VERBOSE((1, orte_ras_base_framework.framework_output,
++                                     "%s ras:oar:allocate:discover: found -- bumped slots to %d",
++                                     ORTE_NAME_PRINT(ORTE_PROC_MY_NAME), node->slots));
++
++                break;
++            }
++        }
++
++        /* Did we find it? */
++
++        if ( opal_list_get_end( nodes ) == item ) {
++
++            /* Nope -- didn't find it, so add a new item to the list */
++
++            OPAL_OUTPUT_VERBOSE((1, orte_ras_base_framework.framework_output,
++                                 "%s ras:oar:allocate:discover: not found -%s- added to list",
++                                 ORTE_NAME_PRINT(ORTE_PROC_MY_NAME), hostname));
++
++            node = OBJ_NEW( orte_node_t );
++            if (NULL == node) {
++                free( hostname );
++                return ORTE_ERR_OUT_OF_RESOURCE;
++            }
++            node->name = hostname;
++            node->launch_id = nodeid;
++            node->slots_inuse = 0;
++            node->slots_max = 0;
++            node->slots = 1;
++            node->state = ORTE_NODE_STATE_UP;
++           opal_list_append( nodes, &node->super );
++        } else {
++            /* Yes, so we need to free the hostname that came back */
++            free( hostname );
++        }
++
++        /* up the nodeid */
++        nodeid++;
++    }
++
++    return ORTE_SUCCESS;
++}
++
++static int orte_ras_oar_finalize(void)
++{
++    return ORTE_SUCCESS;
++}
++
++/* portable getline() function */
++
++#define RAS_BASE_FILE_MAX_LINE_LENGTH   512
++
++static char *ras_oar_getline(FILE *fp)
++{
++    char *ret, *buff = NULL;
++    char input[RAS_BASE_FILE_MAX_LINE_LENGTH];
++
++    ret = fgets(input, RAS_BASE_FILE_MAX_LINE_LENGTH, fp);
++    if (NULL != ret) {
++        input[strlen(input)-1] = '\0';  /* remove newline */
++        buff = strdup(input);
++    }
++
++    return buff;
++}
++
+-- 
+2.1.0
+
