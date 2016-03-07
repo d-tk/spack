@@ -15,7 +15,7 @@ class Tracesinria(Package):
 
     depends_on("mpi", when='+parallel')
     depends_on("dtk-io", when='+dtkio')
-    depends_on("hypre")
+    depends_on("hypre+double_underscore")
     depends_on("dtk")
     depends_on("dtk-linear-algebra-sparse")
 

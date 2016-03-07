@@ -27,7 +27,7 @@ class DtkTraces(Package):
                 "-Ddtk_DIR:PATH=%s" % spec['dtk'].prefix.lib+"/cmake/dtk",
                 "-DdtkLinearAlgebraSparse_DIR:PATH=%s" % spec['dtk-linear-algebra-sparse'].prefix+"/cmake/dtkLinearAlgebraSparse",
                 "-DdtkDiscreteGeometry_DIR:PATH=%s" % spec['dtk-discrete-geometry'].prefix+"/cmake/dtkDiscreteGeometry",
-                "-Dscotch_DIR:PATH=%s" % spec['scotch'].prefix
+                "-DTRACES_DIR:PATH=%s" % spec['tracesinria'].prefix
             ]
             cmake_args.extend(std_cmake_args)
 
