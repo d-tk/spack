@@ -8,6 +8,9 @@ class Qt(Package):
     list_url   = 'http://download.qt-project.org/official_releases/qt/'
     list_depth = 2
 
+    version('5.6.0', '7a2a867bc12384f4161809136d49d4be',
+            url='http://download.qt.io/official_releases/qt/5.6/5.6.0/single/qt-everywhere-opensource-src-5.6.0.tar.gz')
+
     version('5.5.1', '59f0216819152b77536cf660b015d784',
             url='http://download.qt-project.org/official_releases/qt/5.5/5.5.1/single/qt-everywhere-opensource-src-5.5.1.tar.gz')
 
