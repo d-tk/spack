@@ -24,7 +24,7 @@ class Openmpi(Package):
 
     patch('ad_lustre_rwcontig_open_source.patch', when="@1.6.5")
     patch('llnl-platforms.patch', when="@1.6.5")
-#    patch('configure.patch', when="@1.10.0:")
+  #  patch('configure.patch', when="@1.10.0:")
     patch('add-OAR-component-to-the-ras-framework.patch', when="@1.10.0:")
 
     provides('mpi@:2.2', when='@1.6.5')    # Open MPI 1.6.5 supports MPI-2.2
@@ -44,14 +44,14 @@ class Openmpi(Package):
         os.environ['OMPI_FC'] = 'f90'
         os.environ['OMPI_F77'] = 'f77'
 
-    @when('@1.10.0:')
-    def setup(self):
+    #@when('@1.10.0:')
+    #def setup(self):
         # oar patch requires running autogen.sh script
-        subprocess.check_call('./autogen.sh')
+        #subprocess.check_call('./autogen.sh')
 
     def install(self, spec, prefix):
 
-        self.setup()
+        #self.setup()
 
         config_args = ["--prefix=%s" % prefix]
 
