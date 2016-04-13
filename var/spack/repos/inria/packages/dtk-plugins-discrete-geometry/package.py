@@ -15,7 +15,10 @@ class DtkPluginsDiscreteGeometry(Package):
     depends_on("dtk-discrete-geometry@dev",when='@master')
     depends_on("dtk-discrete-geometry@cgal",when='@cgal')
     depends_on("vtk@6.1.0:",when='+vtk')
-    depends_on("paraview",when='+paraview')
+    depends_on("paraview@5:+mpi+python+qt5",when='+paraview')
+
+    # add fake deps because of spack bug in providers/concretize stuff
+    depends_on("blas")
 
     def install(self, spec, prefix):
 

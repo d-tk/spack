@@ -18,7 +18,7 @@ class Netcdf(Package):
     # Dependencies:
     depends_on("curl")  # required for DAP support
     depends_on("hdf", when='+hdf4')
-    depends_on("hdf5+mpi~cxx", when='+mpi')  # required for NetCDF-4 support
+    depends_on("hdf5+mpi", when='+mpi')  # required for NetCDF-4 support
     depends_on("hdf5~mpi", when='~mpi')  # required for NetCDF-4 support
     depends_on("zlib")  # required for NetCDF-4 support
 

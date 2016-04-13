@@ -11,10 +11,8 @@ class DtkPluginsIo(Package):
     variant('mpi',  default=False, description='Enable MPI hdf5')
 
     depends_on("dtk-io")
-    depends_on("hdf5")
-    # if spec.satisfies('+hdf5'):
-    #     depends_on("hdf5+mpi", when"+mpi")
-    # else
+    depends_on('hdf5+mpi', when='+mpi')
+    depends_on('hdf5~mpi', when='~mpi')
 
     def install(self, spec, prefix):
 
