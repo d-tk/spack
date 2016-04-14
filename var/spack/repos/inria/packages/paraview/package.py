@@ -1,4 +1,5 @@
 from spack import *
+import os
 
 class Paraview(Package):
     homepage = 'http://www.paraview.org'
@@ -7,6 +8,7 @@ class Paraview(Package):
 
     version('4.4.0', 'fa1569857dd680ebb4d7ff89c2227378')
     version('5.0.0', '4598f0b421460c8bbc635c9a1c3bdbee')
+    version('5.0.1', 'fdf206113369746e2276b95b257d2c9b')
 
     variant('python', default=False, description='Enable Python support')
 
@@ -29,8 +31,8 @@ class Paraview(Package):
 
     depends_on('bzip2')
     depends_on('freetype')
-    depends_on('hdf5+mpi', when='+mpi')
-    depends_on('hdf5~mpi', when='~mpi')
+    # depends_on('hdf5+mpi', when='+mpi')
+    # depends_on('hdf5~mpi', when='~mpi')
     depends_on('jpeg')
     depends_on('libpng')
     depends_on('libtiff')
@@ -68,6 +70,7 @@ class Paraview(Package):
 
             feature_args = std_cmake_args[:]
             feature_args.append('-DPARAVIEW_BUILD_QT_GUI:BOOL=%s' % feature_to_bool('+qt'))
+            feature_args.append('-DPARAVIEW_BUILD_QT_GUI:BOOL=%s' % feature_to_bool('+qt5'))
             feature_args.append('-DPARAVIEW_ENABLE_PYTHON:BOOL=%s' % feature_to_bool('+python'))
             if '+python' in spec:
                 feature_args.append('-DPYTHON_EXECUTABLE:FILEPATH=%s/bin/python' % spec['python'].prefix)
@@ -79,6 +82,9 @@ class Paraview(Package):
             feature_args.append('-DVTK_USE_X:BOOL=%s' % nfeature_to_bool('+osmesa'))
             feature_args.append('-DVTK_RENDERING_BACKEND:STRING=%s' % feature_to_bool('+opengl2', 'OpenGL2', 'OpenGL'))
 
+            # feature_args.append("-DHDF5_DIR=%s" % spec['hdf5'].prefix )
+            # feature_args.append("-DHDF5_IS_PARALLEL=%s" % feature_to_bool('+mpi'))
+            # feature_args.append("-DHDF5_HL_LIBRARY:FILEPATH=%s" % spec['hdf5'].prefix.lib+"/libhdf5_hl.so")
             if spec['qt'].satisfies('@5'):
                 feature_args.append("-DPARAVIEW_QT_VERSION:STRING=5")
 
@@ -88,16 +94,17 @@ class Paraview(Package):
                 feature_args.append('-DVTK_USE_X:BOOL=OFF')
                 feature_args.append('-DPARAVIEW_DO_UNIX_STYLE_INSTALLS:BOOL=ON')
 
+#            os.environ['HDF5_ROOT'] = spec['hdf5'].prefix
             cmake('..',
                 '-DCMAKE_INSTALL_PREFIX:PATH=%s' % prefix,
                 '-DBUILD_TESTING:BOOL=OFF',
-                '-DVTK_USER_SYSTEM_FREETYPE:BOOL=ON',
-                '-DVTK_USER_SYSTEM_HDF5:BOOL=ON',
-                '-DVTK_USER_SYSTEM_JPEG:BOOL=ON',
-                '-DVTK_USER_SYSTEM_LIBXML2:BOOL=ON',
-                '-DVTK_USER_SYSTEM_NETCDF:BOOL=ON',
-                '-DVTK_USER_SYSTEM_TIFF:BOOL=ON',
-                '-DVTK_USER_SYSTEM_ZLIB:BOOL=ON',
+                '-DVTK_USE_SYSTEM_FREETYPE:BOOL=ON',
+                '-DVTK_USE_SYSTEM_HDF5:BOOL=OFF',
+                '-DVTK_USE_SYSTEM_JPEG:BOOL=ON',
+                '-DVTK_USE_SYSTEM_LIBXML2:BOOL=ON',
+                '-DVTK_USE_SYSTEM_NETCDF:BOOL=ON',
+                '-DVTK_USE_SYSTEM_TIFF:BOOL=ON',
+                '-DVTK_USE_SYSTEM_ZLIB:BOOL=ON',
                 *feature_args)
             make()
             make('install')
