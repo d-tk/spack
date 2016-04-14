@@ -35,7 +35,7 @@ class DtkPluginsDiscreteGeometry(Package):
                 cmake_args.append("-VTK_DIR=%s" % spec['vtk'].prefix.lib+"/cmake/vtk"+vtk_maj_version )
 
             if spec.satisfies('+paraview'):
-                cmake_args.append("-Paraview_DIR=%s" % spec['paraview'].prefix.lib+"/cmake/paraview"+vtk_maj_version )
+                cmake_args.append("-DParaview_DIR=%s" % spec['paraview'].prefix )
 
             cmake(*cmake_args)
             make()
