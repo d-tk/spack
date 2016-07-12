@@ -24,7 +24,7 @@ class Fftw(Package):
         if spec.satisfies('+openmp'):
             config_args.append("--enable-openmp")
 
-            if spec.satisfies('+threads'):
+        if spec.satisfies('+threads'):
             config_args.append("--enable-threads")
 
         configure(*config_args)
