@@ -5,4 +5,5 @@
 # although users can override these settings in their ~/.spack/repos.yaml.
 # -------------------------------------------------------------------------
 repos:
+  - $spack/var/spack/repos/inria
   - $spack/var/spack/repos/builtin
